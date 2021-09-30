@@ -1,0 +1,34 @@
+Brendan Rossmango 505370692
+Homework 2
+
+Exercise 2.1: Navigating through Emacs source code
+
+(expt 2 (expt 3 4))
+
+The number does not fit into a 64 bit expression, as shown by:
+(< (expt 3 4) 63)
+nil
+
+C-h k C-h k opens the *Help* buffer that describes what C-h k does; this command runs the 
+command describe-key (explains what the keystroke does); the help buffer opens up because
+C-h k is the command to open the help buffer which describes what the inputted key does
+
+C-h k M-SPC also opens up the *Help* buffer that describes what M-SPC does, which runs
+the command just-one-space, which, makes just one space (removes all spaces except for one
+in between words, or adds a space if there is none)
+
+Homework: Python scripting
+When randline.py is invoked on an empty file like /dev/null, it produces an IndexError
+due to the function chooseline() which returns random.choice(self.lines). If the sequence
+is empty (the empty file /dev/null produces an empty sequence), and IndexError is raised
+
+When randline.py is run with python3 instead of python, an SyntaxError is produced, due
+to invalid syntax. This is because the update from Python 2 to 3 updated the syntax, such
+as having to write print(x) instead of print x. The aforementioned syntax error is also
+due to incorrect parentheses that would be correct in Python 2.
+
+When my script shuf.py is run with Python 2, most of the commands output the same, but for 
+example, one difference I found is that Python 2 is unable to run repeat infinitely
+(called without -n), whereas Python 3 outputs the positional args infinitely. Python 2
+calls a MemoryError with sys.maxsize (used to output lines infinitely), whereas Python 3
+doesn't.
