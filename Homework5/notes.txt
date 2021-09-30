@@ -1,0 +1,132 @@
+Brendan Rossmango 505370692
+
+Make the 'make check' command in the Makefile. The original check is
+	if [ `./randall 100 | wc -c` -eq 100 ]; \
+	then echo "test passed -> ./randall 100 "; \
+	else echo "test failed -> ./randall 100 "; \
+	fi;
+
+Modularize randall.c. First I take the writebytes function in put it into a 
+file called output.c. Then I make the output.h header file, add header guards
+#ifndef OUTPUT_H 
+#define OUTPUT_H
+
+#endif
+, and then I put the write bytes function declaration in the header file.
+In the output.c file, I iniclude limits.h (writebytes uses CHAR_BIT), 
+stdbool.h (writebytes is a bool function), and stdio.h (writebytes uses 
+putchar. I also include ./output.h (even though this does not need to be 
+included, I include it for good practice)
+
+Then I take the struct cpuid and the functions cpuid, rdrand_supported, 
+hardware_rand64_init, hardware_rand64, and hardware_rand64_fini and put
+their implementations in a file called rand64-hw.c. I put their 
+declarations in the header file rand64-hw.h and add the necessary header
+guard like for output.h. Then I include cpuid.h and imiintrin.h as these
+are needed for the cpuid and rdrand_supported functions. I also include 
+./rand64-hw.h.
+
+Then I take the variable urandstream and the functions software_rand64_init,
+software_rand64, and software_rand64_fini and put these implementations into
+a file called rand64-sw.c. I also put the declarations into the header file
+rand64-sw.h and include the header guard. In the .c file I include stdio.h
+(for the fopen, fread, and fclose functions) and stdlib.h for the abort
+function. I also include ./rand64-sw.h.
+
+Make the options .c and .h files. Make a function called read_options
+that takes in argc and argv[] from main and a struct opts. This function 
+is to be called in main to parse through the options, and read_options will
+use getopt(). read_options sets the opts variables for the main function to 
+use. The struct opts is used to specify aspects of the possible inputs and 
+outputs.
+
+It has a valid bool (this goes to true if the option is valid), 
+input (specifies which input using an enum of 4 possible inputs DEFAULT
+MRAND48, RDRAND, and SLASH_F). The input stays at default if none of the 
+options are selected (so a call to ./randall nbytes works if you don't specify
+-i). Also the struct has an output option (with enum STDOUT and N) that 
+works similarly. Finally, the struct has the r_src variable for the SLASH_F 
+option (sets r_src to file name), block_size (getopt sets the block_size to
+the specified number, which is obtained using atoi(optarg). If this return 
+value is 0 (either the number actually is 0 or the string is not a number,
+then the getopt function prints that this is an invalid option and exits, 
+since you can't print 0 KiB at a time.
+read_options works as follows. First it sets opts->valid to false and 
+opts->input to DEFAULT (this case is when neither -i nor -o is specified).
+Then it uses getopt with the getopt string as ":i:o:" and the switch 
+statement. If it is 'i', then the options are rdrand, mrand48_r, or /F.
+For each of these options, it uses strcmp to compare the user inputted option
+optarg and the string needed. If the strings match, then it sets opts->input
+to the corresponding enum input. It also sets opts->valid to true.
+After checking the 3 options, if the optarg is not NULL, this means that the 
+optarg is an unrecognized input option (maybe it is misspelled or simply not
+an option), so this message is printed to stderr and it exits with 1. Else,
+it breaks out of this case, before setting the valid to true (this is 
+the case for if you write -i with no option specified, this should be an 
+incorrect usage). If opts->valid stays false, then in the main function it 
+prints "incorrect usage" to stderr and exits with 1.
+This works similarly for the ouput. If the string matches stdout, then opts->
+output is STDOUT, and else, opts->output is N. Use atoi to change optarg to
+an int, and if this is 0 (not an int, or actually the number 0) then it is
+invalid option.
+If the option i or o is specified without any option (like ./randall -i),
+then it returns without setting valid to true so it will be incorrect usage.
+Finally, opts->nybytes is set to argv[optind] and this is turned to a long
+using atol. optind is the next argument position.
+
+In main call read_options, and if the opts are not valid, then it prints to
+stderr and exits.
+
+Now I work on what library to use in each case. If rdrand_supported is true
+and the input is either DEFAULT or RDRAND, then init, rand64, and finalize
+are the original functions used for the hardware. If rdrand is not supported
+then I print to stderr and exit. If the input is MRAND48, then the init, 
+rand64, and finalize are set to these functions made for mrand48_r, and
+these functions are implemented and declared in the .c and .h files.
+The mrand init function uses srand48_r with the seed val as time(NULL) and
+a global variable buf, which is a struct drand48_data. In the mrand48_rng
+function, I make the random 64 bits by calling mrand48_r twice with two long
+ints a and b and then returning a shifted left by 32 bits and b.
+mrand48_rng_fini is empty (nothing to destroy or free).
+
+If the opts.input is SLASH_F, then a global variable rsrc is set to the 
+filename (which opts.r_src was set to). Malloc the strlength of the filename
+for the global variable, and strcpy the filename to the global variable rsrc.
+the software_rand64 function is kept the same. The init function is changed,
+the file to open is now rsrc instead of /dev/random. Also, the fini function
+is changed to also free(rsrc). 
+
+If rdrand_supported is false, then we are to use the software implementation,
+and the file to open is /dev/random/. malloc is not needed in this case,
+so we make another function that doesnt free anything.
+
+Then, make code for the -o N option. After initializing, make an output buffer
+that will take in the bytes one at a time, and use memcpy to copy the random
+bytes to this buffer. If there are more than one block needed, then you 
+go through the do while loop again into total_bytes is less than or equal 
+to 0.
+
+
+TIME RESULTS 
+time dd if=/dev/urandom ibs=8192 obs=8192 count=16384 >/dev/null
+16384+0 records in
+16384+0 records out
+134217728 bytes (134 MB, 128 MiB) copied, 0.133165 s, 1.0 GB/s
+real    0m0.154s
+user    0m0.000s
+sys     0m0.125s
+
+time ./randall 133562368 >/dev/null
+real    0m2.188s
+user    0m2.047s
+sys     0m0.141s
+
+time ./randall 133562368 | cat >/dev/null
+real    0m2.220s
+user    0m2.047s
+sys     0m0.156s
+
+time ./randall 133562368 >rand.data
+real    0m2.360s
+user    0m1.969s
+sys     0m0.125s

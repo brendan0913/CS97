@@ -1,0 +1,135 @@
+Brendan Rossmango 505370692
+
+tic-tac-toe
+
+First I installed Node.js using sudo apt install nodejs on my Ubuntu 20.04, 
+then did 
+npx create-react-app tic-tac-toe 
+to create the game, then 
+cd tic-tac-toe
+cd src
+to remove the files, then added the files index.css and index.js using cat, 
+then added the lines:
+import React from 'react';
+import ReactDom from 'react-dom':
+import './index.css';
+then did
+npm start in the project folder to open the empty unfinished tic tac toe game 
+on a local host
+
+Now I use vim to examine the index.js code to see the three components: 
+Square, Board, Game
+Then I pass a prop called value to the Square in Board's renderSquare method
+	return <Square value={i} />;
+
+and change Square's render method to show the value wtih this.props.value
+
+Now to fill the Square component with an X when we click, we change
+the button tag in Square's render() to onClick={() => alert('click')}
+This passes a function as the onClick prop, which will only be called after
+a click
+Next use state to remember that the Square component got clicked, set 
+this.state
+in the constructor. The current value of Square is stored in this.state
+The constructor and super are called with props (propeties)
+super is needed when defining the constructor of a subclass (Square is a 
+subclass of React Component)
+
+To have the Square render mthod display the current state value, we change
+this.props.value to this.state.value in the <button> tag. Also, replace
+the alert('click') with this.setState({value: 'X'}) so onClick, the Square
+renders the X on the game board whenever the button is clicked.
+
+To make it so we can maintain the value of each of the 9 squares, we make a 
+constructor in the parent Board so it has an array of 9 null squares
+this.state.squares: Array(9).fill(null),
+
+To tell each Square its current value (X, O, empty), we pass the state of
+each square in the squares array. 
+Square value = {this.state.squares[i]}
+
+To have Square update the Board's state on click, we pass down a function
+from Board to Square, this.handleClick(i)
+
+Since we now pass value and onClick from Board to Square (and these are 
+props), we change the Square's render method from this.state to this.props
+Also, now Board controls the game state instead of Square controlling it,
+so we must delete the constructor
+
+Now we must implement handleClick(i), which makes a variable squares, sets
+each square to 'X', and sets the state to squares
+slice() creates a copy of the squares array to modify, since squares = 
+this.state.squares and we dont wanna modify the existing array
+
+Square should be a function component, not its own class, since it
+doesnt need to know its own state. It should just be a function that takes
+props as an input. this.props is no longer needed, we just write props
+
+Now we have to add the taking turns feature, starting with X being the 
+default first move; put xIsNext: true in the Board constructor. Each turn
+xIsNext will be flipped (true to false and back) whenever the next turn is
+X. Instead of making squares[i] always X, we make it X if xIsNext is true, 
+and O if that is false. In setState, if xIsNext is true, then we make it 
+false: xIsNext: !this.state.xIsNext,
+now X and O can take turns (we also update the string 'Next player: ' to say
+'X' if xIsNext and 'O' if !xIsNext by changing the render function in Board
+to concatenate the string with this.state.xIsNext ? 'X' : 'O'
+
+To determine the winner, we use a helper function calculateWinner that
+returns 'X', 'O', or null (no winner). The function looks through all
+possible combinations of winning rows/columns/diagonals
+
+Call calcualteWinner(squares) in the Board render function. make a variable
+winner and have it be the return value of calculateWinner(this.state.squares)
+add an if else statement and variable status (the outputted string)
+if (winner) { // if there is a winner
+status = 'Winner: ' + winner // ex) Winner: X
+} else {
+status = 'Next player: ' + ...
+If there is a winner, it will output the winner, else, the game continues and
+it outputs who the next player is
+
+Now, the game should end (ignore click) if there is a winner, so in 
+handleClick, if there is a winner (not null) return
+also, if the click is on an already filled square (squares[i]) return
+
+Now we add the history of moves, achievable since we do not mutate
+the array (we use slice() to make a copy of the array of squares after each 
+move), we use Game to display the past moves, so history state is placed
+in Game. With history in the Game component, the squares state (and 
+constructor) is no longer needed in Board, so we remove it after making
+the history this.state part with an array of 9 null squares and putting
+the xIsNext boolean in Game constructor (Board now receives squares and 
+onClick from Game). We change the state to props in Board and delete its
+constrcutor, and also replace this.handleClick with this.props.onClick() 
+in renderSquare
+
+Now we move the contents of the Board render (winner, status, etc.) to Game
+render, which now also has history as this.state.history and keeps track
+of the most recent (current) move as history.length - 1. The Board render's 
+variables of winner and status are removed
+
+Move handleClick to Game, with the added history and current features, and
+concatenate new history entries (the most recent moves) onto history with
+history: history.concat([{ squares: squares, }])
+To display the game status, in the return part of render, we display
+the current.squares of Board onClick, and the game status under className=
+"game-info"
+
+To show the past moves, we use the map function, which maps the move number
+to each element in the history array. For each move in the game history, 
+create list item <li> which has <button> which has onClick that calls 
+jumpTo (it is how we jump to the previous move). Since the move list
+is dynamic (changes), we have to assign proper keys whenever
+the list is re rendered. To get to the past moves, we use key = {move} in
+the list object
+
+To keep track of steps, we add stepNumber in the constructor and start it 
+at 0, and we implement the jumpTo method to update the stepNumber. This state
+displays the move to the user. To keep from showing the same move after
+a new one is made, we update stepNumber by adding stepNumber: history.length
+Also, if we go back in time and make a new move from that point, we must 
+delete the previous past history that is now in the "future", so we replace
+this.state.history with this.state.history.slice(0,this.state.stepNumber + 1)
+Finally, we make the render method in Game render the currently selected move
+according to stepNumber

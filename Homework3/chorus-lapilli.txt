@@ -1,0 +1,104 @@
+Brendan Rossmango 505370692
+
+Start with the final code from tic-tac-toe and work from there.
+Only make major changes in handleClick, don't change anything else, except
+to add a function called numberOfXsandOs that counts the number of Xs and Os
+
+To create chorus-lapilli, I added two variables to the Game constructor
+called movingTurn, which is initially set false, and prevSpot, which is set
+to -1. These variables are implemented to handle the case when the player
+moves one of their three pieces. When the player clicks on one of their 
+pieces with the intention of moving it, handleClick sets movingTurn to true
+(meaning that the next time handleClick is called, the player intends to 
+click an empty spot to move their piece, so when handleClick is called this
+time, it knows that the player intends to move their piece) and prevSpot
+to the spot of the piece that the player clicked. When handleClick is called
+for their second click, it knows to make that previous spot null (empty).
+
+All other major changes occur only in handleClick.
+To handle the state of the game where no pieces are added, only moved, I add
+a function that counts the number of Xs and Os, with a simple for loop.
+If the number is less than 6, then the if statement (that there are
+6 Xs and Os) will be skipped and handleClick will go through its original 
+form from tic-tac-toe, but if the number is equal to 6, the if statement 
+will be entered, meaning that the players will only be able to move their
+existing pieces.
+This also makes it so no pieces are added. The number of pieces will always
+stay at 6
+Also, because this if statement comes before the check of calculateWinner,
+the if statement also checks that there isnt winner yet with 
+!calculateWinner(squares).
+Inside the if statement, I check if it is X's turn or O's turn with 
+this.state.xIsNext, then I go over the edge cases. 
+If X's turn
+	If the square I click is not X, but I also havent previously clicked
+an X to move (movingTurn is false), then do nothing
+	If the square I press is X and movingTurn is false (I havent prev 
+clicked an X to move), then set the prevSpot to that square I clicked, set
+movingTurn true (next time I click I can move), and return
+	If the square I click is X and movingTurn is already true (meaning
+I clicked an X previously but now I want to move a different X), then 
+set prevSpot to the most recently clicked square
+	If the square I click is O and movingTurn is true, then just set
+prevSpot back to -1 and movingTurn to false (this was just a preference, it's
+when I accidentally press the wrong X to move but can't press a null space
+to redo my choice, so you can just press an O then you can try to press your
+X again)
+The important thing is that all these edge cases return prematurely out of 
+the handleClick. This is because when you click to choose a piece to move
+you shouldnt lose your turn and have it go to the next player's turn. 
+It should still be your turn until you actually press an X and click a null 
+square, which I do next.
+After the edge cases, I do if statement
+	If I click X (movingTurn is true) and then click null space
+Then I do if statements to see if these empty spaces are adjacent to the
+prevSpot (the spot I clicked the X on)
+To check for adjacency, I go through each prevSpot (0-8).
+	If prevSpot is 0, then the next thing I click should be spot 1, 3 
+or 4, or else the function just returns (it's still your turn because
+you havent moved anything)
+		If it is a 1 or 3 or 4, then I make the previous spot (0) 
+null and reset prevSpot to -1 and movingTurn to false for the next time 
+(the move actually happens outside of the if statements, which won't be 
+entered since they all depend on the prevSpot which is now -1, and the only
+valid prevSpots from here are 1-8
+		If the middle square has an X, then I make a temporary 
+squares usinig slice. I use this temp to see if the player would win if they
+move their X from 0, so in temp_squares, the prevSpot if made empty and 
+the desired move at i is filled with X. If calculateWinner(temp_squares) is
+false, then it returns (must try another move). If it is true, the 
+function will place the X at the desired spot and calculateWinner will be 
+called, meaning there is a winner
+
+The same process is done for 1-8 (except for 4, where the temp_squares 
+isn't checked since moving from the middle square to anywhere is always
+allowed, and if it does move to a winning spot, it will be considered a win
+anyway once it leaves the if statements), but with their own adjacent squares
+1 is adjacent to 0, 2, 3, 4, 5
+2 is to 1, 4, 5
+3 is to 0, 1, 4, 6, 7
+4 is to all of them 
+5 is to 1, 2, 4, 7, 8
+6 is to 3, 4, 7
+7 is to 3, 4, 5, 6, 8
+8 is to 4, 5, 7
+
+Now we are out of the if statement where xIsNext is true, so now we go
+to an else statement, which indicates that O is next.
+If it isn't X's turn, it is O's turn, and the same exact process is done for
+O, except that and X and O's are flipped (obviously it now checks that the
+middle square has an O, and the temp squares now see if the move would win
+with an O filled in at the desired move and the previous O spot made empty, 
+and the edge cases are also completed again with X and O flipped)
+
+After these changes, the product should work, nothing else needs to be
+chanegd about handleClick, except in the history setState, I reset
+the prevSpot to -1 and movingTurn to false, as it is now a fresh turn once
+you jump back to the step.
+
+Outside of these if statements to make the game run properly when all 6 
+pieces are placed, nothing major is changed about handleClick. It still
+places the X or O after the move is completed, and it still makes the 
+history squares. The only difference in the history setState is that
+movingTurn and prevSpot are reset to false and -1 respectively, allowing
+the player to place their pieces and move them again.

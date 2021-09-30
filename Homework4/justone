@@ -1,0 +1,5 @@
+#!/bin/bash
+
+output="$(git diff HEAD HEAD^)"
+
+echo "$output"

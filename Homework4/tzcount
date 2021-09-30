@@ -1,0 +1,36 @@
+#!/usr/local/cs/bin/python3
+
+import re, sys
+
+def main():
+    f = sys.stdin.read()
+    f_dates = ""
+    for line in f.splitlines():
+        if line.startswith('Date: '):
+            f_dates = f_dates + line + '\n'
+
+    commit_times = re.compile('[-][0-9]{4}|[+][0-9]{4}')
+    times = commit_times.findall(f_dates)
+
+    timeZones = {}
+    for t in times:
+        if t not in timeZones:
+            timeZones[t] = 1
+        else:
+            timeZones[t] += 1
+
+    negative = []
+    positive = []
+    for i in timeZones.keys():
+        if (i[0] == '-'):
+            negative.append(i)
+        else:
+            positive.append(i)
+
+    sortedDict = sorted(negative, reverse=True) + sorted(positive)
+
+    for i in sortedDict:
+        print(i + ' ' + str(timeZones[i]))
+
+if __name__ == "__main__":
+    main()

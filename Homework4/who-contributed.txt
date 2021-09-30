@@ -1,0 +1,19 @@
+Used the search command C-s in Emacs to search for "Even newspaper reports 
+present contradictory information."
+Began searching in the source files without filename extensions (I rightfully
+assumed that this line would not be in a file with a filename extension,
+like .c, .awk, .h, etc.)
+      I also did not bother checking the files with capitalized names 
+      (README, CONTRIBUTING, LICENSE, etc.)
+Found the problematic line in northamerica
+Used command git blame northamerica
+Searched for "Even newspaper reports present contradictory information." 
+using C-s
+Found c8f960ec (Paul Eggert        2013-09-02 08:09:06 -0700  890) # and 
+wrote "Even newspaper reports present contradictory information."
+It seems that Paul Eggert improperly cited this quote from his book when he
+copied it in on September 2nd, 2013 at 8:09:06
+Used command git log c8f960ec to see why this commit was made. The commit
+at 8:09:06 was made to move links back to their primary files, and the 
+commit 7 hours earlier was to improve citation to Morrison & Stephenson.
+Clearly, Eggert did not improve this citation enough.

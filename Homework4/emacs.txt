@@ -1,0 +1,37 @@
+Brendan Rossmango 505370692
+
+1.
+This mergepoint M at 7dd52bfd8e503316b4aa9c5767850d3985626b26 was made 
+on 10-17-2020 at 09:49:54 by Glenn Morris, with email rgm@gnu.org.
+The mergepoint M was to merge from origin/emacs-27. Its two parents were 
+to merge from origin/emacs-27 and improve documentation of 
+'Info-hide-note-references' in info.texi. M merged these two commits 
+together, and from then on it was the final merge for a while.
+It has one child: fix bad dimensions of initial frame on VcXsrv.
+The merge was made to merge the master branch, the 
+remotes/origin/feature/native-comp branch, and the remotes/origin/master.
+The mergepoint's two parents merged from origin/emacs-27 and an
+admin/release-process that added notes from update files to upstream, so 
+overall, the mergepoint merged from origin/emacs-27, this 
+admin/release-process, and improved documentation of 
+'info-hide-note-references' in info.texi.
+The top left window shows a colored diagram of the branches and commits made.
+The other subwindows show who made the commits, at what time, a log of the
+commits that describes the author, commiter, parent and child commits, 
+branches, and another subwindow that shows the actual changes made 
+(what git diff would show).
+
+3.
+The differences between the cloned GNU Emacs git repository from Savannah 
+and the repository in ~eggert/src/gnu/emacs is seen when executing the
+command git branch. The list of all branches for the repository from
+Savannah is just *master, whereas there are 34 branches in the
+repository in ~eggert/src/gnu/emacs. There are branches for different emacs 
+version (emacs-23, 24, 25, 26, 27), features (like feature/byte-switch), 
+fixes (like fix/bug-2034), old-branches, other-branches, scratch branches, 
+and plenty of other miscellaneous branches like wallet, z100, x-tabs,
+and more, in addition to * master. It seems like the Savannah repository
+is much more streamlined and much less cluttered. Also, Eggert's repo
+is of an older version of emacs. Using git log, we can see that the latest 
+commit for the cloned Savannah repository is November 13, 2020, whereas
+the latest commit for Eggert's repository is November 3, 2020.
