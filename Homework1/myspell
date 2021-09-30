@@ -1,0 +1,25 @@
+#!/bin/bash
+export LC_ALL='C'
+
+#delete HTML comments
+sed 's/<[^>]*>//g' |
+
+#replace spaces with new lines
+sed 's/ /\n/g' |    
+
+#compare words to the correct words in sorted.words, outputs misspelled words
+tr -cs '[:print:]' '[\n*]' | sort -u | comm -23 - sorted.words |
+
+#translates upper case characters to lowercase
+tr '[:upper:]' '[:lower:]' |
+
+#outputs misspelled words (after translating upper to lower, it will not output correctly spelled capitalized words
+tr -cs '[:print:]' '[\n*]' | sort -u | comm -23 - sorted.words |
+
+#deletes all non letters (words with hyphens in them are already omitted from the incorrectly spelled words list)
+sed 's/[^A-Za-z]//g' |
+
+tr -cs '[:print:]' '[\n*]' | sort -u | comm -23 - sorted.words
+
+
+
